@@ -20,8 +20,8 @@ Stelle sicher, dass Python 3 und `pip` installiert sind. Folge dann diesen Schri
 1.  Klone das Repository:
 
     ```bash
-    git clone [URL]
-    cd [DEIN_PROJEKTORDNER]
+    git clone https://github.com/FlownFlown/HERMES_Logo_changer.git
+    cd HERMES_Logo_changer
     ```
 
 2.  Installiere die erforderlichen Python-Pakete:
