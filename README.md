@@ -20,7 +20,7 @@ Stelle sicher, dass Python 3 und `pip` installiert sind. Folge dann diesen Schri
 1.  Klone das Repository:
 
     ```bash
-    git clone [URL_DEINES_REPOSITORY]
+    git clone [URL]
     cd [DEIN_PROJEKTORDNER]
     ```
 
@@ -35,7 +35,7 @@ Stelle sicher, dass Python 3 und `pip` installiert sind. Folge dann diesen Schri
 1.  Starte das Skript:
 
     ```bash
-    python dein_skriptname.py
+    python HERMES_Logo_change_V1.py
     ```
 
 2.  Wähle im Fenster den Ordner aus, der deine .dotx-Vorlagendateien enthält.
@@ -56,8 +56,4 @@ Stelle sicher, dass Python 3 und `pip` installiert sind. Folge dann diesen Schri
 
 ## Lizenz
 
-Dieses Projekt ist unter der [DEINE_LIZENZ] lizenziert.
-
-## Kontakt
-
-Bei Fragen oder Anregungen kannst du dich gerne an [DEINE_EMAIL] wenden.
+Die Verwendung benötigt keine Lizenz.
