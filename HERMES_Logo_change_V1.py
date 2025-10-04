@@ -23,18 +23,27 @@ def dateien_bearbeiten_thread(vorlagen_ordner, logo_pfad, fortschritt_var, statu
         ergebnisse_button (ttk.Button): Button, um das Ergebnis-Fenster anzuzeigen.
     """
     logo_umbenannt = False  # Flag, ob das Logo erfolgreich umbenannt wurde
-    neuer_logo_pfad = ""  # Pfad zum temporär umbenannten Logo
+    neuer_logo_pfad = os.path.join(os.path.dirname(logo_pfad), "image1.png")
+
+    # BUGFIX: Check if 'image1.png' exists and is a different file.
+    if os.path.exists(neuer_logo_pfad) and not os.path.samefile(logo_pfad, neuer_logo_pfad):
+        messagebox.showerror("Fehler", "Eine Datei namens 'image1.png' existiert bereits im Logo-Ordner. Bitte verschieben oder umbenennen Sie sie, um Datenverlust zu vermeiden.")
+        logging.error(f"Konflikt: 'image1.png' existiert bereits und ist nicht das ausgewählte Logo.")
+        start_button.config(state=NORMAL)
+        progress_bar.stop()
+        status_label.config(text="Fehler: 'image1.png' existiert bereits.")
+        return
 
     try:
-        # Logo in "image1.png" umbenennen, wie in den .dotx-Dateien erwartet
-        neuer_logo_pfad = os.path.join(os.path.dirname(logo_pfad), "image1.png")
-
-        # Prüfen, ob die temporäre Datei bereits existiert und ggf. überschreiben
-        if os.path.exists(neuer_logo_pfad):
-            logging.warning(f"Überschreibe existierende temporäre Logo-Datei: {neuer_logo_pfad}")
-        os.rename(logo_pfad, neuer_logo_pfad)
-        logo_umbenannt = True
-        logging.info(f"Logo umbenannt zu: {neuer_logo_pfad}")
+        # Only rename if the file is not already named 'image1.png'
+        if logo_pfad != neuer_logo_pfad:
+            os.rename(logo_pfad, neuer_logo_pfad)
+            logo_umbenannt = True
+            logging.info(f"Logo umbenannt zu: {neuer_logo_pfad}")
+        else:
+            # Logo is already 'image1.png', no action needed.
+            logo_umbenannt = False
+            logging.info("Logo ist bereits 'image1.png', kein Umbenennen nötig.")
 
     except FileNotFoundError:
         messagebox.showerror("Fehler", f"Logo-Datei nicht gefunden: {logo_pfad}")
@@ -258,48 +267,49 @@ def ergebnis_fenster_erstellen():
     return ergebnis_fenster
 
 # --- GUI erstellen ---
-fenster = ttk.Window(title="HERMES Logo changer v1.1", themename="flatly")
-fenster.minsize(500, 280)
+if __name__ == "__main__":
+    fenster = ttk.Window(title="HERMES Logo changer v1.1", themename="flatly")
+    fenster.minsize(500, 280)
 
-vorlagen_ordner_var = tk.StringVar()
-logo_pfad_var = tk.StringVar()
-fortschritt_var = tk.IntVar()
+    vorlagen_ordner_var = tk.StringVar()
+    logo_pfad_var = tk.StringVar()
+    fortschritt_var = tk.IntVar()
 
-# --- Widgets erstellen ---
+    # --- Widgets erstellen ---
 
-vorlagen_frame = ttk.Frame(fenster)
-vorlagen_frame.pack(fill=X, padx=10, pady=(10, 5))
-vorlagen_label = ttk.Label(vorlagen_frame, text="Vorlagenordner:", width=16, anchor='w')
-vorlagen_label.pack(side=LEFT, padx=(0, 5))
-vorlagen_entry = ttk.Entry(vorlagen_frame, textvariable=vorlagen_ordner_var)
-vorlagen_entry.pack(side=LEFT, fill=X, expand=True, padx=(0, 5))
-vorlagen_button = ttk.Button(vorlagen_frame, text="Durchsuchen...", command=lambda: waehle_ordner(vorlagen_ordner_var))
-vorlagen_button.pack(side=RIGHT)
+    vorlagen_frame = ttk.Frame(fenster)
+    vorlagen_frame.pack(fill=X, padx=10, pady=(10, 5))
+    vorlagen_label = ttk.Label(vorlagen_frame, text="Vorlagenordner:", width=16, anchor='w')
+    vorlagen_label.pack(side=LEFT, padx=(0, 5))
+    vorlagen_entry = ttk.Entry(vorlagen_frame, textvariable=vorlagen_ordner_var)
+    vorlagen_entry.pack(side=LEFT, fill=X, expand=True, padx=(0, 5))
+    vorlagen_button = ttk.Button(vorlagen_frame, text="Durchsuchen...", command=lambda: waehle_ordner(vorlagen_ordner_var))
+    vorlagen_button.pack(side=RIGHT)
 
-logo_frame = ttk.Frame(fenster)
-logo_frame.pack(fill=X, padx=10, pady=5)
-logo_label = ttk.Label(logo_frame, text="Logo-Datei (.png):", width=16, anchor='w')
-logo_label.pack(side=LEFT, padx=(0, 5))
-logo_entry = ttk.Entry(logo_frame, textvariable=logo_pfad_var)
-logo_entry.pack(side=LEFT, fill=X, expand=True, padx=(0, 5))
-logo_button = ttk.Button(logo_frame, text="Durchsuchen...", command=lambda: waehle_datei(logo_pfad_var))
-logo_button.pack(side=RIGHT)
+    logo_frame = ttk.Frame(fenster)
+    logo_frame.pack(fill=X, padx=10, pady=5)
+    logo_label = ttk.Label(logo_frame, text="Logo-Datei (.png):", width=16, anchor='w')
+    logo_label.pack(side=LEFT, padx=(0, 5))
+    logo_entry = ttk.Entry(logo_frame, textvariable=logo_pfad_var)
+    logo_entry.pack(side=LEFT, fill=X, expand=True, padx=(0, 5))
+    logo_button = ttk.Button(logo_frame, text="Durchsuchen...", command=lambda: waehle_datei(logo_pfad_var))
+    logo_button.pack(side=RIGHT)
 
-fortschritt_frame = ttk.Frame(fenster)
-fortschritt_frame.pack(fill=X, padx=10, pady=5)
-fortschritt_frame.columnconfigure(0, weight=1)
-status_label = ttk.Label(fortschritt_frame, text="Bereit", anchor=W, width=70)
-status_label.grid(row=0, column=0, sticky='w', padx=5, pady=(5, 0))
-progress_bar = ttk.Progressbar(fortschritt_frame, variable=fortschritt_var, mode="determinate")
-progress_bar.grid(row=1, column=0, sticky='ew', padx=5, pady=(0, 5))
+    fortschritt_frame = ttk.Frame(fenster)
+    fortschritt_frame.pack(fill=X, padx=10, pady=5)
+    fortschritt_frame.columnconfigure(0, weight=1)
+    status_label = ttk.Label(fortschritt_frame, text="Bereit", anchor=W, width=70)
+    status_label.grid(row=0, column=0, sticky='w', padx=5, pady=(5, 0))
+    progress_bar = ttk.Progressbar(fortschritt_frame, variable=fortschritt_var, mode="determinate")
+    progress_bar.grid(row=1, column=0, sticky='ew', padx=5, pady=(0, 5))
 
-button_frame = ttk.Frame(fenster)
-button_frame.pack(pady=10)
-start_button = ttk.Button(button_frame, text="Logos ersetzen", command=dateien_bearbeiten, bootstyle=PRIMARY)
-start_button.pack(pady=(0, 5))
-ergebnisse_button = ttk.Button(button_frame, text="Ergebnisse anzeigen", command=lambda: fenster.ergebnis_fenster.deiconify(), bootstyle=INFO, state=DISABLED)
-ergebnisse_button.pack(pady=(5, 0))
+    button_frame = ttk.Frame(fenster)
+    button_frame.pack(pady=10)
+    start_button = ttk.Button(button_frame, text="Logos ersetzen", command=dateien_bearbeiten, bootstyle=PRIMARY)
+    start_button.pack(pady=(0, 5))
+    ergebnisse_button = ttk.Button(button_frame, text="Ergebnisse anzeigen", command=lambda: fenster.ergebnis_fenster.deiconify(), bootstyle=INFO, state=DISABLED)
+    ergebnisse_button.pack(pady=(5, 0))
 
-ergebnis_fenster_erstellen()
+    ergebnis_fenster_erstellen()
 
-fenster.mainloop()
+    fenster.mainloop()
